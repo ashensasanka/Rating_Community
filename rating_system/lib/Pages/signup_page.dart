@@ -98,8 +98,8 @@ class _SignUpPageState extends State<SignUpPage> {
     DatabaseReference userRef =
         FirebaseDatabase.instance.ref().child('users').child(userFirebase!.uid);
     Map userDataMap = {
-      "name": emailController.text.trim(),
-      "email": passwordController.text.trim(),
+      "name": userNameController.text.trim(),
+      "email": emailController.text.trim(),
       "id": userFirebase.uid,
       "blockStatus": "no",
     };

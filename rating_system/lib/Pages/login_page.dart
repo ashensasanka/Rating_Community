@@ -1,11 +1,17 @@
 import 'dart:convert';
 
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:rating_system/Componants/custom_snackBar.dart';
 import 'package:rating_system/Componants/glass_box.dart';
 import 'package:http/http.dart' as http;
 import 'package:rating_system/Pages/home_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import '../Componants/loading.dart';
+import '../comman_var.dart';
+import '../commonMethods.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -19,6 +25,93 @@ class _LoginPageState extends State<LoginPage> {
   bool rememberMe = false;
   TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
+
+  CommonMethods cMethods = CommonMethods();
+
+  checkIfNetworkIsAvailable() {
+    cMethods.checkConnectivity(context);
+    signInFormValidation();
+  }
+
+  signInFormValidation() {
+    if (!emailController.text.contains('@')) {
+      showCustomSnackBar(context,
+          message: 'Please enter a valid email',
+          backgroundColor: Colors.redAccent,
+          textColor: Colors.white,
+          icon: Icons.error);
+    } else if (passwordController.text.trim().length < 6) {
+      showCustomSnackBar(context,
+          message: 'Your password must be 6 or more characters',
+          backgroundColor: Colors.redAccent,
+          textColor: Colors.white,
+          icon: Icons.error);
+    } else {
+      signInUser();
+      // Proceed with the sign-up process as all validations are passed
+    }
+  }
+
+  signInUser()async{
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) =>
+          LoadingDialog(messageText: 'Allowing you to login...'),
+    );
+
+    final User? userFirebase = (await FirebaseAuth.instance
+        .signInWithEmailAndPassword(
+      email: emailController.text.trim(),
+      password: passwordController.text.trim(),
+    ).catchError((errorMsg){
+      Navigator.pop(context);
+      showCustomSnackBar(context,
+          message: 'Incorrect email or password!',
+          backgroundColor: Colors.redAccent,
+          textColor: Colors.white,
+          icon: Icons.error);
+    })
+    ).user;
+
+    if(!context.mounted)return;
+    Navigator.pop(context);
+
+    if(userFirebase != null){
+      DatabaseReference userRef = FirebaseDatabase.instance.ref().child('users').child(userFirebase.uid);
+      userRef.once().then((snap){
+        if(snap.snapshot.value!=null){
+          if((snap.snapshot.value as Map)['blockStatus']=='no'){
+            userName = (snap.snapshot.value as Map)['name'];
+            userEmail = (snap.snapshot.value as Map)['email'];
+            Navigator.of(context)
+                .pushNamed('/home');
+
+          }
+          else{
+            showCustomSnackBar(context,
+                message: 'You are blocked, Contact admin!',
+                backgroundColor: Colors.redAccent,
+                textColor: Colors.white,
+                icon: Icons.error);
+
+            FirebaseAuth.instance.signOut();
+
+          }
+
+        }
+        else{
+
+          showCustomSnackBar(context,
+              message: 'Your record do not exist as user..',
+              backgroundColor: Colors.redAccent,
+              textColor: Colors.white,
+              icon: Icons.error);
+        }
+      });
+    }
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -249,6 +342,7 @@ class _LoginPageState extends State<LoginPage> {
                                       horizontal: 10.0, vertical: 25),
                                   child: ElevatedButton(
                                     onPressed: () {
+                                      checkIfNetworkIsAvailable();
                                       // _login();
                                       // Action when button is pressed
                                     },

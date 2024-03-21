@@ -1,5 +1,8 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import '../comman_var.dart';
 
 class ProfilePopUp extends StatefulWidget {
   const ProfilePopUp({super.key});
@@ -9,25 +12,9 @@ class ProfilePopUp extends StatefulWidget {
 }
 
 class _ProfilePopUpState extends State<ProfilePopUp> {
-  String userName = "";
-  String email = "";
-  String password_ = "";
 
-  @override
-  void initState() {
-    super.initState();
-    loadData();
-  }
 
-  void loadData() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    setState(() {
-      userName = prefs.getString('user_name') ?? "";
-      email = prefs.getString('email') ?? "";
-      password_ = prefs.getString('password_') ?? "";
-      print('Loaded data to profile page');
-    });
-  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -67,7 +54,7 @@ class _ProfilePopUpState extends State<ProfilePopUp> {
                   Row(
                     children: [
                       Text(
-                        email,
+                        userEmail,
                         style:  TextStyle(
                           fontSize: 16,
                           color: Colors.grey[700],
@@ -123,10 +110,10 @@ class _ProfilePopUpState extends State<ProfilePopUp> {
                         padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
                         child: ElevatedButton(
                           onPressed: () async {
+                            FirebaseAuth.instance.signOut();
+                            Navigator.of(context)
+                                .pushNamed('/welcome');
 
-                            final prefs = await SharedPreferences.getInstance();
-                            prefs.remove("login_state"); // Remove the "login_state" key
-                            Navigator.of(context).pushNamed('/welcome');
 
                           },
                           style: ElevatedButton.styleFrom(

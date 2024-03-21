@@ -1,5 +1,6 @@
 import 'dart:ui';
 
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:rating_system/Pages/post_Item_page.dart';
@@ -37,7 +38,7 @@ class MyApp extends StatelessWidget {
         '/home': (context) => HomePage(),
         '/post-item': (context) => PostItemPage(),
       },
-      home: LandingPage(), // Use _decideMainPage to determine the initial route
+      home: FirebaseAuth.instance.currentUser == null ? LandingPage() :HomePage(), // Use _decideMainPage to determine the initial route
     );
   }
 
