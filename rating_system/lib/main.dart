@@ -12,8 +12,10 @@ import 'Pages/landing_page.dart';
 import 'firebase_options.dart';
 
 void main() async {
-  WidgetsFlutterBinding.ensureInitialized(); // Ensure plugin services are initialized
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform, // This should include your databaseURL
+  );
 
   runApp(MyApp()); // Pass SharedPreferences to MyApp
 }

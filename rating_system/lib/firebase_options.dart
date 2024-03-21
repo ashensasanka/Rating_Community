@@ -49,6 +49,7 @@ class DefaultFirebaseOptions {
     messagingSenderId: '847228825019',
     projectId: 'rating-system-24f88',
     authDomain: 'rating-system-24f88.firebaseapp.com',
+    databaseURL: "https://rating-system-24f88-default-rtdb.firebaseio.com/",
     storageBucket: 'rating-system-24f88.appspot.com',
   );
 

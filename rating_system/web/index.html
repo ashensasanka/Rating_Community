@@ -32,6 +32,26 @@
   <title>rating_system</title>
   <link rel="manifest" href="manifest.json">
 
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database.js"></script>
+  <script>
+    // Your web app's Firebase configuration
+    const firebaseConfig = {
+      apiKey: 'AIzaSyBHLK06vrmSv37TgxV49aqYRWUTJ2ALk-c',
+      authDomain: "rating-system-24f88.firebaseapp.com",
+      databaseURL: "https://rating-system-24f88-default-rtdb.firebaseio.com/",
+      projectId: "rating-system-24f88",
+      storageBucket: "rating-system-24f88.appspot.com",
+      messagingSenderId: '847228825019',
+      appId: '1:847228825019:web:cbe3d9320c3ca1a44c689e',
+    };
+
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+  </script>
+
+
   <script>
     // The value below is injected by flutter build, do not touch.
     var serviceWorkerVersion = null;
