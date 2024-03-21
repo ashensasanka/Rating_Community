@@ -8,6 +8,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../colors.dart';
 import 'package:http/http.dart' as http;
 
+import '../comman_var.dart';
+
 class PostItemPage extends StatefulWidget {
   const PostItemPage({super.key});
 
@@ -21,9 +23,7 @@ class _PostItemPageState extends State<PostItemPage> {
   final TextEditingController _descriptionController = TextEditingController();
   final TextEditingController _priceController = TextEditingController();
 
-  String userName = "";
-  String email = "";
-  String password_ = "";
+
 
   static int _currentId = 0;
 
@@ -75,7 +75,6 @@ class _PostItemPageState extends State<PostItemPage> {
   @override
   void initState() {
     super.initState();
-    loadData();
     generateNextPostId();
   }
 
@@ -86,15 +85,7 @@ class _PostItemPageState extends State<PostItemPage> {
     return _currentId.toString().padLeft(6, '0');
   }
 
-  void loadData() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    setState(() {
-      userName = prefs.getString('user_name') ?? "";
-      email = prefs.getString('email') ?? "";
-      password_ = prefs.getString('password_') ?? "";
-      print('Loaded data to Home Page');
-    });
-  }
+
 
   // void createNewPost() async {
   //   String postId = generateNextPostId();
@@ -306,7 +297,7 @@ class _PostItemPageState extends State<PostItemPage> {
 
                     // Contact details section
                     Text(userName),
-                    Text(email),
+                    Text(userEmail),
                     const SizedBox(height: 24),
 
                     ElevatedButton(
