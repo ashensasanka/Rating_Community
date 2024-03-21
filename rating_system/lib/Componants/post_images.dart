@@ -23,43 +23,42 @@ class _ImageDisplayPageState extends State<ImageDisplayPage> {
   @override
   void initState() {
     super.initState();
-    fetchImages();
   }
 
-  Future<void> fetchImages() async {
-    final uri = Uri.parse('http://api.workspace.cbs.lk/getImages.php?post_id=${widget.postId}');
-    final response = await http.get(uri);
-
-    if (response.statusCode == 200) {
-      final List<dynamic> imagesJson = json.decode(response.body);
-      List<String> urls = imagesJson.map<String>((url) => url.toString().replaceFirst('https://', 'http://')).toList();
-
-      // Assign URLs to variables, checking list length to avoid index out of range errors
-      if (urls.isNotEmpty) {
-        url1 = urls.length > 0 ? urls[0] : null;
-        url2 = urls.length > 1 ? urls[1] : null;
-        url3 = urls.length > 2 ? urls[2] : null;
-        url4 = urls.length > 3 ? urls[3] : null;
-        url5 = urls.length > 4 ? urls[4] : null;
-        // Continue as needed
-      }
-
-      // For demonstration, printing the URLs; Replace with your actual usage
-      print("URL 1: $url1");
-      print("URL 2: $url2");
-      print("URL 3: $url3");
-      print("URL 4: $url4");
-      print("URL 5: $url5");
-      // Print more as needed
-
-      setState(() {
-        // Trigger UI update if necessary
-      });
-      print('Images Loaded');
-    } else {
-      print('Failed to load images. Status code: ${response.statusCode}');
-    }
-  }
+  // Future<void> fetchImages() async {
+  //   final uri = Uri.parse('http://api.workspace.cbs.lk/getImages.php?post_id=${widget.postId}');
+  //   final response = await http.get(uri);
+  //
+  //   if (response.statusCode == 200) {
+  //     final List<dynamic> imagesJson = json.decode(response.body);
+  //     List<String> urls = imagesJson.map<String>((url) => url.toString().replaceFirst('https://', 'http://')).toList();
+  //
+  //     // Assign URLs to variables, checking list length to avoid index out of range errors
+  //     if (urls.isNotEmpty) {
+  //       url1 = urls.length > 0 ? urls[0] : null;
+  //       url2 = urls.length > 1 ? urls[1] : null;
+  //       url3 = urls.length > 2 ? urls[2] : null;
+  //       url4 = urls.length > 3 ? urls[3] : null;
+  //       url5 = urls.length > 4 ? urls[4] : null;
+  //       // Continue as needed
+  //     }
+  //
+  //     // For demonstration, printing the URLs; Replace with your actual usage
+  //     print("URL 1: $url1");
+  //     print("URL 2: $url2");
+  //     print("URL 3: $url3");
+  //     print("URL 4: $url4");
+  //     print("URL 5: $url5");
+  //     // Print more as needed
+  //
+  //     setState(() {
+  //       // Trigger UI update if necessary
+  //     });
+  //     print('Images Loaded');
+  //   } else {
+  //     print('Failed to load images. Status code: ${response.statusCode}');
+  //   }
+  // }
 
 
   @override

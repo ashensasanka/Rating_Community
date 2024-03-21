@@ -567,11 +567,7 @@ class _LandingPageState extends State<LandingPage> {
                 ),
               ],
             ),
-        
-            ImageDisplayPage(postId: '000003'),
 
-            Image.network(
-    'http://api.workspace.cbs.lk/uploads/000007/scaled_ser02.png'),
         
           ],
         ),

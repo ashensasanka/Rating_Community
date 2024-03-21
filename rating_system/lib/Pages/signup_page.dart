@@ -31,59 +31,59 @@ class _SignUpPageState extends State<SignUpPage> {
 
 
 
-  Future<void> createUser(BuildContext context) async {
-    // Validate input fields
-    if (userNameController.text.trim().isEmpty ||
-        passwordController.text.trim().isEmpty ||
-        emailController.text.trim().isEmpty ||
-        confirmPasswordController.text.isEmpty ) {
-      // Show an error message if any of the required fields are empty
-      showRequiredFieldsSnackBar(context);
-      return;
-    }
-
-    // Check if password and confirm password match
-    if (passwordController.text != confirmPasswordController.text) {
-      // Show an error message if passwords do not match
-      showPasswordMismatchSnackBar(context);
-      return;
-    }
-    // Other validation logic can be added here
-
-    // If all validations pass, proceed with the registration
-    var url = "http://api.workspace.cbs.lk/createUser.php";
-
-    var data = {
-      "user_name": userNameController.text.trim(),
-      "email": emailController.text.toString().trim(),
-      "password_": passwordController.text.toString().trim(),
-      "active": '1',
-    };
-
-    http.Response res = await http.post(
-      Uri.parse(url),
-      body: data,
-      headers: {
-        "Accept": "application/json",
-        "Content-Type": "application/x-www-form-urlencoded",
-      },
-      encoding: Encoding.getByName("utf-8"),
-    );
-
-    if (res.statusCode.toString() == "200") {
-      if (jsonDecode(res.body) == "true") {
-        if (!mounted) return;
-        showSuccessSnackBar(context); // Show the success SnackBar
-        Navigator.of(context).pushNamed('/login');
-      } else {
-        if (!mounted) return;
-        showError(context);
-      }
-    } else {
-      if (!mounted) return;
-      showError(context);
-    }
-  }
+  // Future<void> createUser(BuildContext context) async {
+  //   // Validate input fields
+  //   if (userNameController.text.trim().isEmpty ||
+  //       passwordController.text.trim().isEmpty ||
+  //       emailController.text.trim().isEmpty ||
+  //       confirmPasswordController.text.isEmpty ) {
+  //     // Show an error message if any of the required fields are empty
+  //     showRequiredFieldsSnackBar(context);
+  //     return;
+  //   }
+  //
+  //   // Check if password and confirm password match
+  //   if (passwordController.text != confirmPasswordController.text) {
+  //     // Show an error message if passwords do not match
+  //     showPasswordMismatchSnackBar(context);
+  //     return;
+  //   }
+  //   // Other validation logic can be added here
+  //
+  //   // If all validations pass, proceed with the registration
+  //   var url = "http://api.workspace.cbs.lk/createUser.php";
+  //
+  //   var data = {
+  //     "user_name": userNameController.text.trim(),
+  //     "email": emailController.text.toString().trim(),
+  //     "password_": passwordController.text.toString().trim(),
+  //     "active": '1',
+  //   };
+  //
+  //   http.Response res = await http.post(
+  //     Uri.parse(url),
+  //     body: data,
+  //     headers: {
+  //       "Accept": "application/json",
+  //       "Content-Type": "application/x-www-form-urlencoded",
+  //     },
+  //     encoding: Encoding.getByName("utf-8"),
+  //   );
+  //
+  //   if (res.statusCode.toString() == "200") {
+  //     if (jsonDecode(res.body) == "true") {
+  //       if (!mounted) return;
+  //       showSuccessSnackBar(context); // Show the success SnackBar
+  //       Navigator.of(context).pushNamed('/login');
+  //     } else {
+  //       if (!mounted) return;
+  //       showError(context);
+  //     }
+  //   } else {
+  //     if (!mounted) return;
+  //     showError(context);
+  //   }
+  // }
 
 
   void showSuccessSnackBar(BuildContext context) {
@@ -424,7 +424,7 @@ class _SignUpPageState extends State<SignUpPage> {
                                     focusNode: _confirmPasswordFocusNode,
                                     onEditingComplete: () {
                                       // Define what you want to do when editing is complete. For example:
-                                      createUser(context);
+                                      // createUser(context);
                                     },
 
                                     controller: confirmPasswordController,
@@ -482,7 +482,7 @@ class _SignUpPageState extends State<SignUpPage> {
                                           horizontal: 10.0, vertical: 20),
                                       child: ElevatedButton(
                                         onPressed: () {
-                                          createUser(context);
+                                          // createUser(context);
                                           // Action when button is pressed
                                         },
                                         child: const Text(

@@ -1,5 +1,6 @@
 import 'dart:ui';
 
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:rating_system/Pages/post_Item_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -8,18 +9,18 @@ import 'package:rating_system/Pages/home_page.dart';
 import 'package:rating_system/Pages/login_page.dart';
 import 'package:rating_system/Pages/signup_page.dart';
 import 'Pages/landing_page.dart';
+import 'firebase_options.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized(); // Ensure plugin services are initialized
-  SharedPreferences prefs = await SharedPreferences.getInstance(); // Initialize SharedPreferences
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
-  runApp(MyApp(prefs: prefs)); // Pass SharedPreferences to MyApp
+  runApp(MyApp()); // Pass SharedPreferences to MyApp
 }
 
 class MyApp extends StatelessWidget {
-  final SharedPreferences prefs; // Add SharedPreferences to MyApp
 
-  const MyApp({super.key, required this.prefs});
+  const MyApp({super.key,});
 
   @override
   Widget build(BuildContext context) {
@@ -34,18 +35,11 @@ class MyApp extends StatelessWidget {
         '/home': (context) => HomePage(),
         '/post-item': (context) => PostItemPage(),
       },
-      home: _decideMainPage(), // Use _decideMainPage to determine the initial route
+      home: LandingPage(), // Use _decideMainPage to determine the initial route
     );
   }
 
-  Widget _decideMainPage() {
-    // Check if 'login_state' is not null, then navigate to HomePage, otherwise to LandingPage
-    if (prefs.getString('login_state') != null) {
-      return HomePage();
-    } else {
-      return LandingPage();
-    }
-  }
+
 }
 
 
