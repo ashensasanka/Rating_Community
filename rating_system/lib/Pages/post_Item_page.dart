@@ -1,14 +1,20 @@
 import 'dart:io';
+import 'dart:math';
+import 'package:firebase_database/firebase_database.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:rating_system/Pages/profile_popup.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../Componants/custom_snackBar.dart';
+import '../Componants/loading.dart';
 import '../colors.dart';
 import 'package:http/http.dart' as http;
 
 import '../comman_var.dart';
+import '../commonMethods.dart';
 
 class PostItemPage extends StatefulWidget {
   const PostItemPage({super.key});
@@ -18,16 +24,34 @@ class PostItemPage extends StatefulWidget {
 }
 
 class _PostItemPageState extends State<PostItemPage> {
+  final TextEditingController _itemController = TextEditingController();
   final TextEditingController _modelController = TextEditingController();
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
   final TextEditingController _priceController = TextEditingController();
 
+  String selectedDeviceType='';
+
+  CommonMethods cMethods = CommonMethods();
 
 
-  static int _currentId = 0;
+
 
   List<XFile>? _imageFileList;
+  List<String> _urlOfUploadedImages = [];
+
+  String _currentId = Random().nextInt(999999).toString().padLeft(6, '0');
+
+  String generateNextPostId() {
+    // Convert the current ID back to an integer, increment it, and then convert it back to a String.
+    int currentIdInt = int.parse(_currentId);
+    currentIdInt++;
+    _currentId = currentIdInt.toString().padLeft(6, '0');
+    // Return the postId formatted as a 6-digit string, e.g., "000002"
+    print(_currentId);
+    return _currentId;
+
+  }
 
   void _pickImages() async {
     try {
@@ -78,54 +102,159 @@ class _PostItemPageState extends State<PostItemPage> {
     generateNextPostId();
   }
 
-  static String generateNextPostId() {
-    // Increment the postId
-    _currentId++;
-    // Return the postId formatted as a 6-digit string, e.g., "000001"
-    return _currentId.toString().padLeft(6, '0');
+  checkIfNetworkIsAvailable()
+  {
+    cMethods.checkConnectivity(context);
+
+    if(_imageFileList != null) //image validation
+        {
+      signUpFormValidation();
+    }
+    else
+    {
+      showCustomSnackBar(context,
+          message: 'Please choose images first.',
+          backgroundColor: Colors.redAccent,
+          textColor: Colors.white,
+          icon: Icons.error);
+    }
+  }
+
+  signUpFormValidation()
+  {
+    if(_modelController.text.trim().length < 1)
+    {
+
+      showCustomSnackBar(context,
+          message: "Model can't be empty!" ,
+          backgroundColor: Colors.redAccent,
+          textColor: Colors.white,
+          icon: Icons.error);
+    }
+    else if(_titleController.text.trim().length < 1)
+    {
+      showCustomSnackBar(context,
+          message: "Title can't be empty!" ,
+          backgroundColor: Colors.redAccent,
+          textColor: Colors.white,
+          icon: Icons.error);
+    }
+    else if(_descriptionController.text.length < 1)
+    {
+      showCustomSnackBar(context,
+          message: "Description can't be empty!" ,
+          backgroundColor: Colors.redAccent,
+          textColor: Colors.white,
+          icon: Icons.error);
+    }
+    else if(_priceController.text.trim().length < 1)
+    {
+      showCustomSnackBar(context,
+          message: "Price can't be empty!" ,
+          backgroundColor: Colors.redAccent,
+          textColor: Colors.white,
+          icon: Icons.error);
+    }
+    else
+    {
+      uploadImageToStorage();
+    }
+  }
+
+  uploadImageToStorage() async {
+    showDialog(
+      context: context,
+      barrierDismissible: false, // Prevent dialog from closing on tap outside
+      builder: (BuildContext context) => LoadingDialog(messageText: "Uploading your Images..."),
+    );
+
+    if (_imageFileList != null && _imageFileList!.length <= 5) {
+      for (var imageFile in _imageFileList!) {
+        String imageIDName = DateTime.now().millisecondsSinceEpoch.toString();
+        Reference referenceImage = FirebaseStorage.instance.ref().child("Images/$_currentId/$imageIDName");
+
+        if (kIsWeb) {
+          // For Flutter web, read the file as a blob and upload
+          final blob = await imageFile.readAsBytes();
+          UploadTask uploadTask = referenceImage.putBlob(blob);
+          TaskSnapshot snapshot = await uploadTask;
+          String imageUrl = await snapshot.ref.getDownloadURL();
+          setState(() {
+            _urlOfUploadedImages.add(imageUrl);
+          });
+        } else {
+          // For mobile, continue using putFile
+          UploadTask uploadTask = referenceImage.putFile(File(imageFile.path));
+          TaskSnapshot snapshot = await uploadTask;
+          String imageUrl = await snapshot.ref.getDownloadURL();
+          setState(() {
+            _urlOfUploadedImages.add(imageUrl);
+          });
+        }
+      }
+
+      // After uploading all images, proceed to save post data
+      Navigator.pop(context);
+      registerNewDriver();
+    } else {
+      // Handle the error or show a message if there are no images or too many images
+      showCustomSnackBar(context,
+          message: 'Failed to upload your Images. Please try again.',
+          backgroundColor: Colors.red.shade500,
+          textColor: Colors.white,
+          icon: Icons.error_outline);
+    }
   }
 
 
 
-  // void createNewPost() async {
-  //   String postId = generateNextPostId();
-  //   print("Generated Post ID: $postId");
-  //   if (_imageFileList != null && _imageFileList!.isNotEmpty) {
-  //     await uploadImages(_imageFileList!, postId);
-  //     // Additional post creation logic here
-  //   } else {
-  //     print("No images selected.");
-  //   }
-  // }
-  //
-  //
-  // Future<void> uploadImages(List<XFile> images, String postId) async {
-  //   final uri = Uri.parse('http://api.workspace.cbs.lk/upload.php');
-  //
-  //   for (var image in images) {
-  //     // For Flutter web, use bytes to upload
-  //     var bytes = await image.readAsBytes();
-  //
-  //     // Create a MultipartFile from bytes
-  //     var multipartFile = http.MultipartFile.fromBytes(
-  //       'image', // Field name for the file
-  //       bytes,
-  //       filename: image.name, // Filename
-  //     );
-  //
-  //     var request = http.MultipartRequest('POST', uri)
-  //       ..fields['post_id'] = postId
-  //       ..files.add(multipartFile);
-  //
-  //     var response = await request.send();
-  //
-  //     if (response.statusCode == 200) {
-  //       print('Image uploaded');
-  //     } else {
-  //       print('Image upload failed');
-  //     }
-  //   }
-  // }
+  registerNewDriver() async {
+    // Show loading or progress indicator
+    showDialog(
+      context: context,
+      barrierDismissible: false, // Prevent dialog from closing on tap outside
+      builder: (BuildContext context) => LoadingDialog(messageText: "Posting your add..."),
+    );
+
+    DatabaseReference postsRef = FirebaseDatabase.instance.ref().child("posts/$_currentId");
+    Map<String, dynamic> postsDataMap = {
+      "photos": _urlOfUploadedImages,
+      "deviceType": selectedDeviceType,
+      "itemType": _itemController.text.trim(),
+      "model": _modelController.text.trim(),
+      "title": _titleController.text.trim(),
+      "description": _descriptionController.text.trim(),
+      "price": _priceController.text.trim(),
+      "postID": _currentId,
+      // Add other post details as needed
+    };
+
+    try {
+      await postsRef.set(postsDataMap);
+      // If the post is successfully uploaded, first close the loading dialog
+      Navigator.pop(context); // This closes the loading dialog
+
+      // Then, show a success message
+      showCustomSnackBar(context,
+          message: 'Your post uploaded successfully!',
+          backgroundColor: Colors.green.shade500,
+          textColor: Colors.white,
+          icon: Icons.check_circle_outline_rounded);
+    } catch (error) {
+      // If there's an error, first close the loading dialog
+      Navigator.pop(context); // This closes the loading dialog
+
+      // Then, handle errors, such as showing an error message
+      // Example error handling:
+      showCustomSnackBar(context,
+          message: 'Failed to upload your post. Please try again.',
+          backgroundColor: Colors.red.shade500,
+          textColor: Colors.white,
+          icon: Icons.error_outline);
+    }
+  }
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -220,9 +349,12 @@ class _PostItemPageState extends State<PostItemPage> {
 
                     // Add your TextField widgets here
                     DropdownButtonFormField<String>(
-                      value: null, // Initial value or selected value
+                      value: selectedDeviceType.isEmpty ? null : selectedDeviceType, // Use the selectedDeviceType as the current value
                       onChanged: (newValue) {
                         // Update the state with the new value
+                        setState(() {
+                          selectedDeviceType = newValue ?? ''; // Update the selectedDeviceType with the new value
+                        });
                       },
                       items: <String>['Mobile Phone', 'Device Type B', 'Device Type C']
                           .map<DropdownMenuItem<String>>((String value) {
@@ -252,7 +384,7 @@ class _PostItemPageState extends State<PostItemPage> {
                     // ... More DropdownButtonFormField widgets for each dropdown
 
                     TextField(
-                      controller: _modelController,
+                      controller: _itemController,
                       decoration: const InputDecoration(labelText: 'Item Type'),
 
                     ),
@@ -302,6 +434,7 @@ class _PostItemPageState extends State<PostItemPage> {
 
                     ElevatedButton(
                       onPressed: () {
+                        checkIfNetworkIsAvailable();
                         // createNewPost();
                         // Implement the logic to post the item when the button is pressed
                       },
