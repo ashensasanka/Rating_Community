@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:rating_system/colors.dart';
 import 'package:http/http.dart' as http;
@@ -110,6 +111,37 @@ class _LandingPageState extends State<LandingPage> {
     }
   }
 
+  @override
+  void initState() {
+    super.initState();
+    _fetchPosts();
+  }
+
+  Future<void> _fetchPosts() async {
+    DatabaseReference postsRef = FirebaseDatabase.instance.ref().child('posts');
+    DatabaseEvent event = await postsRef.once();
+
+    if (event.snapshot.exists) {
+      final postsData = Map<String, dynamic>.from(event.snapshot.value as Map);
+      final List<Post> loadedPosts = [];
+      postsData.forEach((postId, postData) {
+        // Convert postData to a Map and then to a Post object
+        final post = Post.fromMap(Map<String, dynamic>.from(postData), postId);
+        loadedPosts.add(post);
+
+        // Assuming 'photos' is a List<String> of image URLs in your Post model
+        if (post.photos.isNotEmpty) {
+          print("Image URLs for Post $postId: ${post.photos}");
+        } else {
+          print("No image URLs found for Post $postId");
+        }
+      });
+
+      setState(() {
+        _posts = loadedPosts;
+      });
+    }
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(

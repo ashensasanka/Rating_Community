@@ -195,7 +195,7 @@ class _PostItemPageState extends State<PostItemPage> {
 
       // After uploading all images, proceed to save post data
       Navigator.pop(context);
-      registerNewDriver();
+      createNewPost();
     } else {
       // Handle the error or show a message if there are no images or too many images
       showCustomSnackBar(context,
@@ -208,7 +208,7 @@ class _PostItemPageState extends State<PostItemPage> {
 
 
 
-  registerNewDriver() async {
+  createNewPost() async {
     // Show loading or progress indicator
     showDialog(
       context: context,

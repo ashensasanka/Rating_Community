@@ -8,6 +8,7 @@ import '../colors.dart';
 import '../comman_var.dart';
 import '../commonMethods.dart';
 import 'landing_page.dart';
+import 'openPost_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -289,20 +290,27 @@ class _HomePageState extends State<HomePage> {
                 itemCount: _posts.length, // The count of posts to display
                 itemBuilder: (context, index) {
                   final post = _posts[index]; // Access the current post in the loop
-                  return GridTile(
-                    child: Card(
-                      child: Column(
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Text(post.model, style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                          ),
-                          // Example of displaying the first photo if available
-                          if (post.photos.isNotEmpty)
-                            Expanded(
-                              child: Image.network(post.photos.first, fit: BoxFit.cover),
+                  return InkWell(
+                    onTap: () {
+                      Navigator.of(context).push(MaterialPageRoute(
+                        builder: (context) => OpenPostPage(post: post),
+                      ));
+                    },
+                    child: GridTile(
+                      child: Card(
+                        child: Column(
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Text(post.model, style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                             ),
-                        ],
+                            // Example of displaying the first photo if available
+                            if (post.photos.isNotEmpty)
+                              Expanded(
+                                child: Image.network(post.photos.first, fit: BoxFit.cover),
+                              ),
+                          ],
+                        ),
                       ),
                     ),
                   );
@@ -327,7 +335,7 @@ class _HomePageState extends State<HomePage> {
 
 
 class Post {
-  final String itemId, itemType, title, description, price,deviceType,model;
+  final String itemId, itemType, title, description, price,deviceType,model,postID;
   final List<String> photos; // List of image URLs
 
   Post({
@@ -338,6 +346,7 @@ class Post {
     required this.price,
     required this.deviceType,
     required this.model,
+    required this.postID,
     required this.photos,
   });
 
@@ -351,6 +360,7 @@ class Post {
       price: map['price'] ?? '',
       deviceType: map['deviceType'] ?? '',
       model: map['model'] ?? '',
+      postID: map['postID'] ?? '',
       photos: List<String>.from(map['photos'] ?? []),
     );
   }
