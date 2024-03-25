@@ -1,9 +1,8 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
-import 'package:rating_system/Componants/post_images.dart';
+
 import 'package:rating_system/Pages/profile_popup.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 import '../colors.dart';
 import '../comman_var.dart';
@@ -19,10 +18,13 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   TextEditingController searchController = TextEditingController();
+  List<Post> _posts = [];
 
+  @override
   void initState() {
     super.initState();
     getUserInfoAndCheckBlockStatus();
+    _fetchPosts();
   }
 
   getUserInfoAndCheckBlockStatus() async{
@@ -61,6 +63,33 @@ class _HomePageState extends State<HomePage> {
       }
     });
   }
+
+  Future<void> _fetchPosts() async {
+    DatabaseReference postsRef = FirebaseDatabase.instance.ref().child('posts');
+    DatabaseEvent event = await postsRef.once();
+
+    if (event.snapshot.exists) {
+      final postsData = Map<String, dynamic>.from(event.snapshot.value as Map);
+      final List<Post> loadedPosts = [];
+      postsData.forEach((postId, postData) {
+        // Convert postData to a Map and then to a Post object
+        final post = Post.fromMap(Map<String, dynamic>.from(postData), postId);
+        loadedPosts.add(post);
+
+        // Assuming 'photos' is a List<String> of image URLs in your Post model
+        if (post.photos.isNotEmpty) {
+          print("Image URLs for Post $postId: ${post.photos}");
+        } else {
+          print("No image URLs found for Post $postId");
+        }
+      });
+
+      setState(() {
+        _posts = loadedPosts;
+      });
+    }
+  }
+
 
 
 
@@ -195,20 +224,25 @@ class _HomePageState extends State<HomePage> {
               children: [
                 Container(
                   margin: EdgeInsets.all(25),
-                  height: 300,
+                  height: 200,
                   decoration: BoxDecoration(
+                    color: Colors.teal, // Teal color background
                     borderRadius: BorderRadius.circular(10),
-                    image: DecorationImage(
-                      image: AssetImage(
-                          'images/topImage.jpg'), // Replace with your image path
-                      fit: BoxFit.cover, // Adjust the BoxFit as needed
-                      colorFilter: ColorFilter.mode(
-                        Colors.black.withOpacity(0.6),
-                        BlendMode.srcOver,
-                      ),
+                    border: Border.all(
+                      color: Colors.lightBlue, // Light blue border color
+                      width: 3, // Border width
+                    ),
+                    gradient: LinearGradient(
+                      begin: Alignment.centerLeft,
+                      end: Alignment.centerRight,
+                      colors: [
+                        Color(0xFF005255), // Left side color
+                        Color(0xFF00C7C7), // Right side color
+                      ],
                     ),
                   ),
                 ),
+
                 Positioned.fill(
                   child: Center(
                     child: Column(
@@ -241,9 +275,85 @@ class _HomePageState extends State<HomePage> {
               ],
             ),
 
+
+            // Replace your existing ListView.builder with this GridView.builder
+            Container(
+              margin: EdgeInsets.symmetric(horizontal: 25),
+              height: MediaQuery.of(context).size.height, // You might want to adjust this
+              child: GridView.builder(
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 4, // Number of columns
+                  crossAxisSpacing: 10.0, // Spacing between the columns
+                  mainAxisSpacing: 10.0, // Spacing between rows
+                ),
+                itemCount: _posts.length, // The count of posts to display
+                itemBuilder: (context, index) {
+                  final post = _posts[index]; // Access the current post in the loop
+                  return GridTile(
+                    child: Card(
+                      child: Column(
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Text(post.model, style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                          ),
+                          // Example of displaying the first photo if available
+                          if (post.photos.isNotEmpty)
+                            Expanded(
+                              child: Image.network(post.photos.first, fit: BoxFit.cover),
+                            ),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+
+
+            // Image.network(
+            //   "https://firebasestorage.googleapis.com/v0/b/rating-system-24f88.appspot.com/o/Images%2F180082%2F1711221829099?alt=media&token=5eedccc9-9f2f-4e97-9085-db4e9cb01f71",
+            //   width: 50,
+            //   scale: 1.0,
+            //   height: 50,
+            // ),
           ],
         ),
       ),
     );
   }
 }
+
+
+
+class Post {
+  final String itemId, itemType, title, description, price,deviceType,model;
+  final List<String> photos; // List of image URLs
+
+  Post({
+    required this.itemId,
+    required this.itemType,
+    required this.title,
+    required this.description,
+    required this.price,
+    required this.deviceType,
+    required this.model,
+    required this.photos,
+  });
+
+  // Factory constructor to create a Post instance from a Map
+  factory Post.fromMap(Map<String, dynamic> map, String itemId) {
+    return Post(
+      itemId: itemId,
+      itemType: map['itemType'] ?? '',
+      title: map['title'] ?? '',
+      description: map['description'] ?? '',
+      price: map['price'] ?? '',
+      deviceType: map['deviceType'] ?? '',
+      model: map['model'] ?? '',
+      photos: List<String>.from(map['photos'] ?? []),
+    );
+  }
+}
+
+

@@ -7,6 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../Componants/custom_snackBar.dart';
 import '../Componants/glass_box.dart';
 import '../Componants/post_images.dart';
+import 'home_page.dart';
 
 class LandingPage extends StatefulWidget {
   const LandingPage({Key? key}) : super(key: key);
@@ -21,6 +22,9 @@ class _LandingPageState extends State<LandingPage> {
   TextEditingController passwordController = TextEditingController();
   bool isObscure = true;
   bool? rememberMe = false;
+
+  List<Post> _posts = [];
+
 
   Future<void> _login() async {
     bool success = await login(context);
@@ -522,16 +526,21 @@ class _LandingPageState extends State<LandingPage> {
               children: [
                 Container(
                   margin: EdgeInsets.all(25),
-                  height: 300,
+                  height: 200,
                   decoration: BoxDecoration(
+                    color: Colors.teal, // Teal color background
                     borderRadius: BorderRadius.circular(10),
-                    image: DecorationImage(
-                      image: AssetImage('images/topImage.jpg'), // Replace with your image path
-                      fit: BoxFit.cover, // Adjust the BoxFit as needed
-                      colorFilter: ColorFilter.mode(
-                        Colors.black.withOpacity(0.6),
-                        BlendMode.srcOver,
-                      ),
+                    border: Border.all(
+                      color: Colors.lightBlue, // Light blue border color
+                      width: 3, // Border width
+                    ),
+                    gradient: LinearGradient(
+                      begin: Alignment.centerLeft,
+                      end: Alignment.centerRight,
+                      colors: [
+                        Color(0xFF005255), // Left side color
+                        Color(0xFF00C7C7), // Right side color
+                      ],
                     ),
                   ),
                 ),
@@ -566,6 +575,40 @@ class _LandingPageState extends State<LandingPage> {
                   ),
                 ),
               ],
+            ),
+
+            // Replace your existing ListView.builder with this GridView.builder
+            Container(
+              margin: EdgeInsets.symmetric(horizontal: 25),
+              height: MediaQuery.of(context).size.height, // You might want to adjust this
+              child: GridView.builder(
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 4, // Number of columns
+                  crossAxisSpacing: 10.0, // Spacing between the columns
+                  mainAxisSpacing: 10.0, // Spacing between rows
+                ),
+                itemCount: _posts.length, // The count of posts to display
+                itemBuilder: (context, index) {
+                  final post = _posts[index]; // Access the current post in the loop
+                  return GridTile(
+                    child: Card(
+                      child: Column(
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Text(post.model, style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                          ),
+                          // Example of displaying the first photo if available
+                          if (post.photos.isNotEmpty)
+                            Expanded(
+                              child: Image.network(post.photos.first, fit: BoxFit.cover),
+                            ),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+              ),
             ),
 
         
