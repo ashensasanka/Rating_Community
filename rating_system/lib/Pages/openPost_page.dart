@@ -20,6 +20,7 @@ class _OpenPostPageState extends State<OpenPostPage> {
   final TextEditingController _ratingController = TextEditingController();
   List<Comment> _comments = [];
   List<Rating> _ratings = [];
+  int currentRating = 0;
 
   double calculateAverageRating() {
     if (_ratings.isEmpty) return 0;
@@ -150,6 +151,9 @@ class _OpenPostPageState extends State<OpenPostPage> {
       Navigator.pop(context);
       loadRatings();
       calculateAverageRating();
+      setState(() {
+        currentRating = 0;
+      });
       showCustomSnackBar(context,
           message: 'Your rating has been added successfully!',
           backgroundColor: Colors.green.shade500,
@@ -241,7 +245,7 @@ class _OpenPostPageState extends State<OpenPostPage> {
                             fontSize: 22, fontWeight: FontWeight.bold)),
 
                     Container(
-                      height: 180,
+                      height: 150,
                       color: Colors.white,
                       child: Column(
                         children: [
@@ -348,16 +352,33 @@ class _OpenPostPageState extends State<OpenPostPage> {
                       height: 10,
                     ),
 
-                    Text('Ratings: ',
-                        style: TextStyle(
-                            fontSize: 22, fontWeight: FontWeight.bold)),
+
+
+                    Row(
+                      children: [
+                        Expanded(
+                          flex: 1,
+                          child: Text('Average Rating:',style: TextStyle(
+                              fontSize: 20, fontWeight: FontWeight.bold)),
+                        ),
+                        Expanded(
+                          flex: 3,
+                          child: buildStars(averageRatingPercentage),
+                        ),
+                        // ...
+                      ],
+                    ),
 
                     SizedBox(
                       height: 10,
                     ),
 
+                    Text('Ratings: ',
+                        style: TextStyle(
+                            fontSize: 18,)),
+
                     Container(
-                      height: 180,
+                      height: 100,
                       color: Colors.white,
                       child: Column(
                         children: [
@@ -367,89 +388,94 @@ class _OpenPostPageState extends State<OpenPostPage> {
                                 ? ListView.builder(
                               itemCount: _ratings.length,
                               itemBuilder: (context, index) {
+                                double ratingValue = double.tryParse(_ratings[index].ratingValue) ?? 0;
                                 return ListTile(
                                   title: Text(
-                                    "${_ratings[index].user}: ${_ratings[index].ratingValue}",
+                                    "${_ratings[index].user}:",
                                     style: TextStyle(fontSize: 14),
                                   ),
-                                  // You may add subtitle or trailing widgets if needed
+                                  subtitle: buildStars(ratingValue), // Convert rating value to percentage
                                 );
                               },
                             )
                                 : Center(child: Text('No ratings yet')),
                           ),
-                          Expanded(
-                            flex: 1,
-                            // Ensure the TextField has constraints
-                            child: Row(
-                              children: [
-                                Expanded(
-                                    flex: 2, child: Text('Average Rating: ${averageRatingPercentage.toStringAsFixed(2)}%'),),
-                                Expanded(
-                                  flex: 2,
-                                  child: TextField(
-                                    controller: _ratingController,
-                                    keyboardType: TextInputType.number,
-                                    decoration: InputDecoration(
-                                      hintText: "Add your rating",
-                                      fillColor: Colors
-                                          .grey.shade300, // Gray fill color
-                                      filled: true,
-                                      border: OutlineInputBorder(
-                                        borderSide:
-                                            BorderSide(color: Colors.black),
-                                        borderRadius:
-                                            BorderRadius.circular(5.0),
-                                      ),
-                                      enabledBorder: OutlineInputBorder(
-                                        borderSide: BorderSide(
-                                            color: Colors.black, width: 2.0),
-                                        borderRadius:
-                                            BorderRadius.circular(5.0),
-                                      ),
-                                      focusedBorder: OutlineInputBorder(
-                                        borderSide: BorderSide(
-                                            color: Colors.black, width: 2.0),
-                                        borderRadius:
-                                            BorderRadius.circular(5.0),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                                Expanded(
-                                  flex: 1,
-                                  child: Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 10.0),
-                                    child: ElevatedButton.icon(
-                                      onPressed: () {
-                                        createNewRating();
-                                      },
-                                      icon: Icon(
-                                        Icons.star_border_purple500_rounded,
-                                        color: Colors.white,
-                                      ),
-                                      style: ElevatedButton.styleFrom(
-                                        fixedSize: const Size(160, 20),
-                                        backgroundColor: Colors
-                                            .amberAccent, // Set the background color to green
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(
-                                              30), // Set the border radius
-                                        ),
-                                      ),
-                                      label: Text(
-                                        'Add',
-                                        style: TextStyle(color: Colors.white),
-                                      ),
-                                    ),
-                                  ),
-                                )
-                              ],
-                            ),
-                          ),
+
                         ],
                       ),
+                    ),
+
+                    SizedBox(
+                      height: 5,
+                    ),
+
+                    Divider(color: Colors.grey,),
+
+                    Row(
+                      children: [
+
+                        Expanded(
+                          flex: 1,
+                          child: Text('Add your rating:',style: TextStyle(
+                              fontSize: 20, fontWeight: FontWeight.bold)),
+                        ),
+
+                        // Replace the TextField with StarRatingInput in your build method
+                        Expanded(
+                          flex: 2,
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: List.generate(5, (index) { // Assuming 5 is your max rating
+                              return Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                                child: IconButton(
+                                  onPressed: () {
+                                    setState(() {
+                                      currentRating = index + 1;
+                                      _ratingController.text = (currentRating * 20).toString();
+                                    });
+                                  },
+                                  icon: Icon(
+                                    index < currentRating ? Icons.star : Icons.star_border,
+                                    color: index < currentRating ? Colors.amber : Colors.grey,
+                                    size: 30,
+                                  ),
+                                ),
+                              );
+                            }),
+                          ),
+                        ),
+
+                        Expanded(
+                          flex: 1,
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 10.0),
+                            child: ElevatedButton.icon(
+                              onPressed: () {
+                                createNewRating();
+                              },
+                              icon: Icon(
+                                Icons.star_border_purple500_rounded,
+                                color: Colors.white,
+                              ),
+                              style: ElevatedButton.styleFrom(
+                                fixedSize: const Size(160, 20),
+                                backgroundColor: Colors
+                                    .amberAccent, // Set the background color to green
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(
+                                      30), // Set the border radius
+                                ),
+                              ),
+                              label: Text(
+                                'Add',
+                                style: TextStyle(color: Colors.white),
+                              ),
+                            ),
+                          ),
+                        )
+                      ],
                     ),
 
                     // Add more details as needed
@@ -462,6 +488,24 @@ class _OpenPostPageState extends State<OpenPostPage> {
       ),
     );
   }
+
+  Widget buildStars(double rating) {
+    List<Widget> stars = [];
+    int fullStars = rating ~/ 20; // Each full star represents 20%
+    int halfStars = (rating % 20) >= 10 ? 1 : 0; // If remainder is 10% or more, show a half star
+    for (int i = 0; i < fullStars; i++) {
+      stars.add(Icon(Icons.star, color: Colors.amber));
+    }
+    if (halfStars == 1) {
+      stars.add(Icon(Icons.star_half, color: Colors.amber));
+      fullStars++; // Include the half star in the count
+    }
+    for (int i = fullStars; i < 5; i++) {
+      stars.add(Icon(Icons.star_border, color: Colors.amber));
+    }
+    return Row(children: stars);
+  }
+
 }
 
 class Comment {
@@ -495,4 +539,7 @@ class Rating {
     );
   }
 }
+
+
+
 
