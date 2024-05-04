@@ -421,7 +421,7 @@ class _PostItemPageState extends State<PostItemPage> {
                         _pickImages();
                       },
                       style: ElevatedButton.styleFrom(
-                        primary: Colors.teal, // Set the background color
+                        backgroundColor: Colors.teal, // Set the background color
                       ),
                       child: const Text('Upload Images',style: TextStyle(color: Colors.white),),
                     ),
@@ -439,7 +439,7 @@ class _PostItemPageState extends State<PostItemPage> {
                         // Implement the logic to post the item when the button is pressed
                       },
                       style: ElevatedButton.styleFrom(
-                        primary: Colors.teal, // Set the background color
+                        backgroundColor: Colors.teal, // Set the background color
                       ),
                       child: const Text('Post Item',style: TextStyle(color: Colors.white),),
                     ),
